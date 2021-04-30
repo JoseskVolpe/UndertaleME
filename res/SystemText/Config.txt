@@ -1,0 +1,2 @@
+\d030Ativar o som? Isso pode causar lag em alguns celulares\r
+\d030Ativar a música?

@@ -1,0 +1,15 @@
+MIDlet-Version: 1.0.0
+Screen: DYNAMIC
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-Name: UndertaleME
+max_hp: 92
+Graphics: AUTO
+LOVE: 19
+MIDlet-Vendor: Josesk Volpe
+PlayerName: Frisk
+MIDlet-1: UndertaleME,/icon.png,josesk.undertaleme.Game
+MicroEdition-Profile: MIDP-2.0
+framelimit: 13
+MIDlet-Jar-URL: UndertaleME.jar
+audio_compatible_mode: auto
+Debug: true
