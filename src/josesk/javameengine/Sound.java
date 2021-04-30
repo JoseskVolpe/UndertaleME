@@ -112,6 +112,7 @@ public class Sound{
 			
 			if(audio_mode == AUDIO_MODE_AUTO) {
 				
+				//TODO: Identify ULTRA mode (Research how MMAPI versions work)
 				if(supportsMixing) {
 					Sound.audio_mode = AUDIO_MODE_QUALITY;
 				}else {
