@@ -58,7 +58,7 @@ UndertaleME is a Open-source Undertale Fight Engine project for oldschool Java-E
 
 ### Project importing instructions
 * Fork and pull this project (recommended, so you can share your contribution easier), or download as ZIP and extract it.
-Go to File > Import... > General > Existing Projects into Workspace > Next
+* Go to File > Import... > General > Existing Projects into Workspace > Next
 ![Captura de Tela (703)](https://user-images.githubusercontent.com/78318343/116650967-9b245d80-a958-11eb-8383-a2d3e0a8bc1b.png)
 * Mark Select root directory: > Click "Browse" then search for UndertaleME project folder you just pull or extracted > Finish
 ![Captura de Tela (704)](https://user-images.githubusercontent.com/78318343/116651194-04a46c00-a959-11eb-8091-69947a845ec9.png)
