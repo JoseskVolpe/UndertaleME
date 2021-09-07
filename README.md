@@ -30,6 +30,7 @@ UndertaleME is a Open-source Undertale Fight Engine project for oldschool Java-E
 * Minimum and recommended specification may change in the future
 
 ## Deploy instructions
+  **These instructions may change as there's new plans for this project**
 ### You'll need:
 * Eclipse IDE: https://www.eclipse.org/downloads/
 * Java ME SDK Eclipse Plugin: https://www.oracle.com/java/technologies/sdk-downloads.html
@@ -73,7 +74,7 @@ UndertaleME is a Open-source Undertale Fight Engine project for oldschool Java-E
 
 
 ## License
-UndertaleME is currently licensed under GNU GPLv3 license, and will be changed to MIT license once it's nearly to a Beta version<br>
+UndertaleME is currently licensed under GNU GPLv3 license<br>
 Undertale and its content is a intellectual property of Toby Fox and to all its respective owners. All rights reserved<br>
 J2ME Army Knife library is a intellectual property of Ovidiu Iliescu. All rights reserved<br>
 MIDI contents belongs to their respective owners.<br>
