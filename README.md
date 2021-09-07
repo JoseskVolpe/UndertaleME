@@ -30,7 +30,7 @@ UndertaleME is a Open-source Undertale Fight Engine project for oldschool Java-E
 * Minimum and recommended specification may change in the future
 
 ## Deploy instructions
-  **These instructions may change as there's new plans for this project**
+  **These instructions may change as there's [new plans](https://github.com/JoseskVolpe/UndertaleME/discussions/6) for this project**
 ### You'll need:
 * Eclipse IDE: https://www.eclipse.org/downloads/
 * Java ME SDK Eclipse Plugin: https://www.oracle.com/java/technologies/sdk-downloads.html
