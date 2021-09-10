@@ -1,4 +1,6 @@
 # UndertaleME
+<b>OUDATED README, some stuff will be changed soon</b>
+
 <img src="https://i.imgur.com/c7vy8cU.png">
 UndertaleME is a Open-source Undertale Fight Engine project for oldschool Java-Enabled mobile devices. Developers will be able to create custom fights, dialogs, monsters, items, actions etc, and may even use it to create Undertale fangames with elaborated custom history.
 <br>Some stuffs are written in portuguese into the game-side, but it's currently a experimental project and they can be easily translated<br>
