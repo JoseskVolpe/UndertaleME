@@ -1,3 +1,5 @@
 /.settings/*
-/.mtj.tmp/verified/.gitignore
-/bin/.gitignore
+/.mtj.tmp/verified/*
+/bin/*
+/.mtj.tmp/
+/bin/
