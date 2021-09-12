@@ -38,7 +38,6 @@ import java.io.Reader;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
-import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.layout.Dialog;
 
 import java.io.IOException;
@@ -54,8 +53,8 @@ public class Text {
 	private int phrase, nphrases, index;
 	private int delay;
 	private Dialog dialog;
-	private Sync sync;
 	private boolean finished;
+	private short times;
 	
 	/*
 	 * Create text with given String
@@ -66,7 +65,6 @@ public class Text {
 		delay = 30;
 		headFrame = 0;
 		phrase = 0;
-		sync = new Sync(delay, false);
 		
 		content = s;
 		
@@ -87,7 +85,6 @@ public class Text {
 		delay = 30;
 		headFrame = 0;
 		phrase = 0;
-		sync = new Sync(delay, false);
 		
 		content = getFileText(s);
 		
@@ -154,7 +151,6 @@ public class Text {
 				i++;
 				
 				delay = Integer.valueOf(number).intValue();
-				sync = new Sync(delay, false);
 				number = null;
 				//System.out.print("\\d###");
 				
@@ -337,7 +333,7 @@ public class Text {
 		finished = false;
 		index=0;
 		speak="";
-		sync = new Sync(delay, false);
+		times=0;
 		
 	}
 	
@@ -346,7 +342,7 @@ public class Text {
 	 */
 	public final void start() {
 		
-		sync.begin();
+		times=0;
 		
 	}
 	
@@ -355,7 +351,7 @@ public class Text {
 	 * @throws Exception
 	 * @throws Error
 	 */
-	public final void skip() throws Exception, Error {
+	public final void skip(){
 		
 		speak = aphrase;
 		index = aphrase.length();
@@ -384,8 +380,7 @@ public class Text {
 	 */
 	public static void DrawText(Graphics g, int color, Font font, Text text, int xlimit, int x, int y, boolean star) {
 		
-		int fontsizewidth=6;
-		int fontsizeheight=9;
+		int fontsizeheight=font.getHeight();
 		
 		int line = 0;
 		int col = 0;
@@ -395,7 +390,7 @@ public class Text {
 		
 		if(star){
 			g.drawString("*", x, y, Graphics.TOP | Graphics.LEFT);
-			col++;
+			col+=font.charWidth('*');
 		}
 		
 		//GameEngine.Debug("Speak: "+text.getSpeak());
@@ -406,8 +401,7 @@ public class Text {
 			int calcol = col;
 			while(j<text.getFullSpeak().length()-1 && text.getFullSpeak().charAt(j)!=' ' && text.getFullSpeak().charAt(j)!='\n') {
 				j++;
-				calcol++;
-				if(x+fontsizewidth*calcol>=xlimit) {
+				if(x+calcol>=xlimit) {
 					col=0;
 					line++;
 					break;
@@ -420,8 +414,8 @@ public class Text {
 			}
 			
 			//GameEngine.Debug(text.getSpeak().charAt(i));
-			g.drawChar(text.getSpeak().charAt(i), x+fontsizewidth*col, y+(fontsizeheight*line), Graphics.TOP | Graphics.LEFT);
-			col++;
+			g.drawChar(text.getSpeak().charAt(i), x+col, y+(fontsizeheight*line), Graphics.TOP | Graphics.LEFT);
+			col+=font.charWidth(text.getSpeak().charAt(i));
 			
 		}
 		
@@ -435,19 +429,20 @@ public class Text {
 	 * @throws Error
 	 * @throws Exception
 	 */
-	public void Update() throws Error, Exception{
+	public void Update(float delta){
 		
-		if(aphrase!=null && index<aphrase.length() && sync.isTimedOut()) {
+		times+=delta*1000;
+		
+		if(aphrase!=null && index<aphrase.length() && times>=delay) {
 			
 			if(speak.length()<=0 && dialog!=null) dialog.onTextStart();
-					
-			if(sync.getTime()>delay) {
-				if(dialog!=null) dialog.onTextResume();
-				sync = new Sync(delay, false);
-				sync.begin();
-			}
 			
-			int lr = sync.lateRate();
+			int lr = times/delay;
+			
+			if(times>delay) {
+				if(dialog!=null) dialog.onTextResume();
+				times=0;
+			}
 			
 			write:{
 				for(int i=0; i<lr; i++) {
@@ -460,8 +455,7 @@ public class Text {
 						//sync.reset(sync.late());
 						
 						if(speak.endsWith(",") | speak.endsWith("!") | speak.endsWith("?")) {
-							sync = new Sync(delay+200, false);
-							sync.begin();
+							times=-200;
 							if(dialog!=null) dialog.onTextPause();
 							break write;
 						}
@@ -474,7 +468,6 @@ public class Text {
 					}
 				
 				}
-				sync.reset(sync.late());
 			}
 			
 		}

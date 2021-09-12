@@ -49,7 +49,7 @@ public class Effect implements PaintableObject, Runnable{
 	private Fight fightscene;
 	private static boolean loaded=false;
 
-	public final void paint(Graphics g) throws Error, Exception {
+	public final void paint(Graphics g){
 		
 		if(sprite!=null) {
 			sprite.setFrame(frame);
@@ -66,9 +66,9 @@ public class Effect implements PaintableObject, Runnable{
 	 * @throws Error
 	 * @throws Exception
 	 */
-	protected void render(Graphics g) throws Error, Exception{}
+	protected void render(Graphics g){}
 
-	public void Update() throws Error, Exception {}
+	public void Update(float delta){}
 
 	public void onDisplaySizeChange(int lastWidth, int lastHeight, int wDif, int hDif) {}
 	

@@ -40,7 +40,6 @@ import javax.microedition.lcdui.Image;
 import josesk.javameengine.LoadResources;
 import josesk.javameengine.RandomAl;
 import josesk.javameengine.Sound;
-import josesk.javameengine.Sync;
 import josesk.javameengine.Vibrator;
 import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.GameView;
@@ -53,7 +52,6 @@ public class ErrorView extends GameView implements Runnable{
 	
 	private byte posText[][];
 	private byte posRect[][];
-	private Sync sync2;
 	private Sound teleport;
 	
 	/**
@@ -69,8 +67,6 @@ public class ErrorView extends GameView implements Runnable{
 			errorName = errorName.substring(0, errorName.indexOf(':'));
 		
 		glitchText = false;
-		sync = new Sync(RandomAl.generateRandom(0, 2000), false);
-		sync2 = new Sync(300, false);
 		
 		ErrorSans = LoadResources.loadImage("/ErrorSans.png");
 		
@@ -80,10 +76,6 @@ public class ErrorView extends GameView implements Runnable{
 		showContent = false;
 		
 		updateTextAndRect();
-		
-		sync.begin();
-		sync2.begin();
-		
 		
 	}
 	
@@ -145,9 +137,9 @@ public class ErrorView extends GameView implements Runnable{
 		
 	}
 	
-	public void Update() {
+	public void Update(float delta) {
 		
-		if(sync.isTimedOut() && !glitchText) {
+		if(!glitchText) {
 			
 			for(byte i=0; i<SError.length()-1; i++) {
 				byte randomindex = (byte)RandomAl.generateRandom(1, 6);
@@ -162,23 +154,14 @@ public class ErrorView extends GameView implements Runnable{
 			
 			glitchText = true;
 			
-			sync = new Sync(150, false);
-			sync.begin();
-			
-		}else if(sync.isTimedOut() && glitchText) {
+		}else{
 			
 			glitchText = false;
 			
 			SError = "* "+error;
-			sync = new Sync(RandomAl.generateRandom(0, 2000), false);
-			sync.begin();
 			
 		}
-		
-		if(sync2.isTimedOut()) {
-			updateTextAndRect();
-			sync2.reset();
-		}
+		updateTextAndRect();
 		
 	}
 	

@@ -43,7 +43,6 @@ import com.j2mearmyknife.image.transformations.ImageTransformationSmooth;
 import com.j2mearmyknife.interfaces.AbstractImage;
 
 import josesk.javameengine.RandomAl;
-import josesk.javameengine.Sync;
 import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.scenes.cores.Fight;
 import josesk.undertaleme.scenes.cores.fight.resources.Monster;
@@ -285,7 +284,7 @@ public class FightBar {
 		}
 		
 		public void run() {
-			
+			/*
 			int stretch=100;
 			Bars = null;
 			Sync sync = new Sync(4, true);
@@ -316,12 +315,12 @@ public class FightBar {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {}
-			}
+			}*/
 			animating=false;
 			renderImage = null; //Free from the memory
 			Bars = null;
 			
-		}
+		//}
 		
 	}
 	

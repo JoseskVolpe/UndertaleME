@@ -108,7 +108,7 @@ public class Startup extends GameView implements Runnable{
 
 	}
 	
-	public void Update() {
+	public void Update(float delta) {
 		
 		if(loaded) {
 			
@@ -126,7 +126,6 @@ public class Startup extends GameView implements Runnable{
 		
 		data.spriteData = new Sprite[8];
 		data.soundData = new Sound[4];
-		data.textData = new Text[1];
 		
 		data.spriteData[0] = LoadResources.createSprite("/buttons.jpg", 14, 19);
 		data.spriteData[1] = LoadResources.createSprite("/selButtons.jpg", 14, 19);

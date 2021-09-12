@@ -954,9 +954,18 @@ public class Sound{
 	Check https://nikita36078.github.io/J2ME_Docs/docs/jsr135/ (Although it don't say about their damn glitches on this technlogy. Ugh, so much headache)
 	@throws Error, Exception
 	*/
-	public final boolean Start() throws Exception, Error {
+	public final boolean Start(){
 		
-		return Start(0);
+		try {
+			return Start(0);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Error e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 		
 	}
 	
@@ -965,7 +974,7 @@ public class Sound{
 	Check https://nikita36078.github.io/J2ME_Docs/docs/jsr135/ (Although it don't say about their damn glitches on this technlogy. Ugh, so much headache)
 	@throws Error, Exception
 	*/
-	public final boolean Stop() throws Exception, Error {
+	public final boolean Stop(){
 		
 		try {
 		
@@ -990,12 +999,12 @@ public class Sound{
 			if(DEBUG_MODE) GameEngine.DebugError("Stop() exception: "+getSource());
 			if(DEBUG_MODE) GameEngine.DebugError(e.toString());
 			errors++;
-			throw e;
+			return false;
 		}catch(Error e) {
 			if(DEBUG_MODE) GameEngine.DebugError("Stop() error: "+getSource());
 			if(DEBUG_MODE) GameEngine.DebugError(e.toString());
 			errors++;
-			throw e;
+			return false;
 		}
 		
 	}

@@ -78,7 +78,6 @@ public class GameEngine extends GameCanvas implements Runnable {
 	private static Font consoleFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 	
 	private Vector 	  views;
-	private int		  framelimit;
 	private static boolean graphicsq;
 	private static boolean definedScreenMode, screenMode;
 	private GameView view;
@@ -86,7 +85,6 @@ public class GameEngine extends GameCanvas implements Runnable {
 	private GameView secondScreenView; //GameView for small screen on dual-screen flip phones
 	private GameView secondViewToChange;
 	private static GameEngine engine;
-	private static long syncCurrentTimeMillis;
 	
 	private boolean paused;
 	private boolean stoped;
@@ -104,7 +102,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 	 * @param model game model.
 	 * @param fps frames per second.
 	 */
-	public GameEngine(int fps) {
+	public GameEngine() {
 		super(false);
 		
 		debug=Game.getGame().getAppProperty("Debug").toLowerCase().equals("true");
@@ -134,7 +132,6 @@ public class GameEngine extends GameCanvas implements Runnable {
 		
 		minRes = Math.min(getWidth(), getHeight());
 		
-		syncCurrentTimeMillis = 0;
 		engine = this;
 		error = false;
 		flipPhoneClosed = false;
@@ -142,7 +139,6 @@ public class GameEngine extends GameCanvas implements Runnable {
 		this.views  = new Vector();
 		
 		this.stoped	  = true;
-		this.framelimit	  = fps;
 		
 		String gm = Game.getGame().getAppProperty("Graphics").toLowerCase();
 		if(gm.equals("auto")) {
@@ -581,6 +577,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 	/**
 	 * Game Loop
 	 */
+	long interval = System.currentTimeMillis();
 	public void run() {
 		this.stoped = false;
 		systemDebugTime=System.currentTimeMillis();
@@ -637,28 +634,26 @@ public class GameEngine extends GameCanvas implements Runnable {
 					
 				}
 				
+				long delta = System.currentTimeMillis()-interval;
+				
 				if(error||!flipPhoneClosed||secondScreenView==null) {
 					if(view!=null) {
-						
-						view.update();
+						view.update(delta/1000.f);
 					}
 				}else {
 					
-					if(secondScreenView!=null) secondScreenView.update();
+					if(secondScreenView!=null) secondScreenView.update(delta/1000.f);
 					
 				}
 				
-				long interval = System.currentTimeMillis();
-				interval = System.currentTimeMillis() - interval;
-				interval = ((1000 / framelimit) - interval);
-				syncCurrentTimeMillis+=1000/framelimit;
+				interval = System.currentTimeMillis();
 				
 				if(System.currentTimeMillis()-systemDebugTime>=1000) {
 					systemDebugTime=System.currentTimeMillis();
 					ramConsumeCalc();
 				}
 				
-				Thread.sleep(interval > 0 ? interval : 0x00);
+				Thread.sleep(5);
 			} catch (Exception e) {
 				forceError(e);
 			} catch (Error e) {
@@ -745,25 +740,6 @@ public class GameEngine extends GameCanvas implements Runnable {
 	 */
 	public static GameEngine getCanvas() {
 		return engine;
-	}
-	
-	/**
-	 * Get defined FPS limit
-	 * @return FPS limit
-	 */
-	public final int getFPSLimit(){
-		
-		return framelimit;
-		
-	}
-	
-	/**
-	 * Set a FPS limit
-	 * EXPERIMENTAL
-	 * @param framelimit
-	 */
-	public final void setFPSLimit(int framelimit) { //NOT TESTED FEATURE
-		this.framelimit = framelimit;
 	}
 	
 	/**
@@ -869,15 +845,5 @@ public class GameEngine extends GameCanvas implements Runnable {
 		}
 		
 	}
-	
-	/**
-	 * returns systemtime synchronized to FPS in millis
-	 * @return syncSystemTimeMillis
-	 */
-	public static long syncCurrentTimeMillis() {
-		
-		return syncCurrentTimeMillis;
-		
-	};
 	
 }

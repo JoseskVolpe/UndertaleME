@@ -167,7 +167,7 @@ public class ActionButton implements PaintableObject{
 		
 	}
 
-	public void Update() {
+	public void Update(float delta) {
 		
 		
 		

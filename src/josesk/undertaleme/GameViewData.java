@@ -36,7 +36,6 @@ package josesk.undertaleme;
 import javax.microedition.lcdui.game.Sprite;
 
 import josesk.javameengine.Sound;
-import josesk.javameengine.Text;
 
 public final class GameViewData {
 
@@ -46,6 +45,5 @@ public final class GameViewData {
 	public double[] doubleData = {};
 	public Sprite[] spriteData = {};
 	public Sound[] soundData = {};
-	public Text[] textData = {};
 	
 }

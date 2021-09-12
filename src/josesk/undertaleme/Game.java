@@ -55,11 +55,9 @@ public class Game extends MIDlet implements CommandListener {
 		
 		game = this;
 		
-		final int framelimit = Integer.parseInt(getAppProperty("framelimit"));
-		
 		this.display = Display.getDisplay(this);
 		
-		this.engine = new GameEngine(framelimit);
+		this.engine = new GameEngine();
 		
 			
 		engine.setCommandListener(this);

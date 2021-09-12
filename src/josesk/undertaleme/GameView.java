@@ -34,17 +34,14 @@
 package josesk.undertaleme;
 import javax.microedition.lcdui.Graphics;
 
-import josesk.javameengine.Sync;
 import josesk.undertaleme.layout.Dialog;
 
 /**
  * GameView class provides an interface
  * for the game objects views.
  */
-public class GameView implements Runnable{
+public abstract class GameView implements Runnable{
 	
-	
-	protected Sync sync = new Sync();
 	protected Dialog dialog;
 	private Thread thisThread;
 	
@@ -105,7 +102,6 @@ public class GameView implements Runnable{
 		
 		boolean stop = onError(error);
 		if(stop) {
-			sync = null;
 			dialog = null;
 			if(thisThread!=null) {
 				thisThread.interrupt();
@@ -169,12 +165,11 @@ public class GameView implements Runnable{
 		if(dialog!=null) dialog.paint(g);
 		
 	}
-	public final void update() throws Error, Exception{
+	public final void update(float delta) throws Error, Exception{
 		
-		sync.Update();
-		Update();
+		Update(delta);
 		
-		if(dialog!=null) dialog.Update();
+		if(dialog!=null) dialog.Update(delta);
 		
 	}
 	
@@ -184,7 +179,7 @@ public class GameView implements Runnable{
 	 * @throws Error
 	 * @throws Exception
 	 */
-	protected void render(Graphics g) throws Error, Exception {};
+	protected abstract void render(Graphics g);
 	
 	/**
 	 * Use it to update frames
@@ -193,9 +188,7 @@ public class GameView implements Runnable{
 	 * @throws Error
 	 * @throws Exception
 	 */
-	protected void Update() throws Error, Exception {};
-	
-	
+	protected abstract void Update(float delta);
 	
 	public final GameViewData getData() {
 		

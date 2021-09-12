@@ -163,15 +163,14 @@ public class Dialog implements PaintableObject{
 		
 		final int textx = x+(w/20)+Startup.headSize+(w/18);
 		final int texty = y+(h/6);
-		final int fontsize = 6;
 		
 		Text.DrawText(g, 0xffffff, font, text, textlim, textx, texty, true);
 		
 	}
 
-	public void Update() throws Error, Exception {
+	public void Update(float delta){
 
-		text.Update();
+		text.Update(delta);
 		
 	}
 	
@@ -202,7 +201,7 @@ public class Dialog implements PaintableObject{
 		text.start();
 	}
 	
-	public final void onTextStart() throws Exception, Error {
+	public final void onTextStart() {
 		
 		if(dSound!=null)
 			dSound.Start();
@@ -211,21 +210,21 @@ public class Dialog implements PaintableObject{
 		
 	}
 	
-	public final void onTextPause() throws Exception, Error{
+	public final void onTextPause(){
 		
 		if(dSound!=null)
 			dSound.Stop();
 		
 	}
 	
-	public final void onTextResume() throws Exception, Error {
+	public final void onTextResume(){
 		
 		if(dSound!=null)
 			dSound.Start();
 		
 	}
 	
-	public final void onTextFinish() throws Exception, Error {
+	public final void onTextFinish(){
 		
 		if(dSound!=null)
 			dSound.Stop();
@@ -234,7 +233,7 @@ public class Dialog implements PaintableObject{
 		
 	}
 	
-	public final void actionButton() throws Exception, Error {
+	public final void actionButton(){
 		
 		if(finished) {
 			

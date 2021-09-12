@@ -103,4 +103,9 @@ public class Loading extends GameView{
 		
 	}
 
+	protected void Update(float delta) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
