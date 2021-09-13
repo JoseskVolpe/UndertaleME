@@ -74,7 +74,9 @@ public class Game extends MIDlet implements CommandListener {
 			
 			this.engine.start();
 			
-			this.view = new Startup();
+			//this.view = new Startup();
+			GameEngine.Debug("GraphicsTest");
+			this.view = new GraphicsTest();
 			engine.attach(view);
 			
 		}

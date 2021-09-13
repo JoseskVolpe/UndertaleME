@@ -116,7 +116,10 @@ public class GameEngine extends GameCanvas implements Runnable {
 		DebugInfo("Device: "+System.getProperty("microedition.platform"));
 		DebugInfo("VM has "+(Runtime.getRuntime().totalMemory()/1000.f)+"kb RAM");
 		
-		String audioMode = Game.getGame().getAppProperty("audio_compatible_mode").toLowerCase();
+		String audioMode="auto";
+		try{
+			audioMode = Game.getGame().getAppProperty("audio_compatible_mode").toLowerCase();
+		}catch(NullPointerException e) {}
 		
 		if(audioMode.equals("ultra")) {
 			Sound.initialize(Sound.AUDIO_MODE_ULTRA);

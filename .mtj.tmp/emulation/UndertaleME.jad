@@ -2,7 +2,7 @@ Debug: true
 Graphics: AUTO
 LOVE: 19
 MIDlet-1: UndertaleME,/icon.png,josesk.undertaleme.Game
-MIDlet-Jar-Size: 275710
+MIDlet-Jar-Size: 271527
 MIDlet-Jar-URL: UndertaleME.jar
 MIDlet-Name: UndertaleME
 MIDlet-Vendor: Josesk Volpe

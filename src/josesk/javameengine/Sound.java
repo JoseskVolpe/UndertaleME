@@ -71,7 +71,7 @@ public class Sound{
 	private static boolean DEBUG_MODE=true;
 	
 	
-	public final static boolean supportsMixing = System.getProperty("supports.mixing").toLowerCase().equals("true"); //Indicates if device supports audio mixing
+	public final static boolean supportsMixing = System.getProperty("supports.mixing") != null && System.getProperty("supports.mixing").toLowerCase().equals("true"); //Indicates if device supports audio mixing
 	public final static String mmapiVersion = System.getProperty("microedition.media.version");
 	
 	private static Sound soundsInMemory[];
