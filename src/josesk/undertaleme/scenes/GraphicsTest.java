@@ -6,15 +6,20 @@ import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
 import josesk.javameengine.Sprite;
+import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.GameView;
 
 public class GraphicsTest extends GameView{
 
 	Sprite sp;
+	int oW, oH;
 	
 	public GraphicsTest() {
 		try {
 			sp = new Sprite(Image.createImage("/buttons.jpg"), 4, 1);
+			sp.setFrameSequence(new int[] {0,3,2});
+			oW = (int) sp.getWidth();
+			oH = (int) sp.getHeight();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -25,22 +30,30 @@ public class GraphicsTest extends GameView{
 		
 		g.setColor(0xaaaaaa);
 		g.fillRect(0, 0, g.getClipWidth(),g.getClipHeight());
+		g.translate(g.getClipWidth()/2, g.getClipHeight()/2);
 		
-		sp.setX(g.getClipWidth()/2);
-		sp.setY(g.getClipHeight()/2);
-		sp.setRot((int)System.currentTimeMillis()/1);
-		sp.paint(g);
+		sp.setRot((int)System.currentTimeMillis()/10);
+		sp.setX((GameEngine.getOriginalResolutionWidth()/4.f)*Math.cos(System.currentTimeMillis()/500.d));
+		sp.setY((GameEngine.getOriginalResolutionHeight()/4.f)*Math.sin(System.currentTimeMillis()/500.d));
+		sp.setWidth(oW*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
+		sp.setHeight(oH*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
 		
-		if(System.currentTimeMillis()-lastT>=3000) {
-			Sprite.clearUnusedCache();
-			lastT=System.currentTimeMillis();
+		try{
+			sp.paint(g);
+		}catch(ArrayIndexOutOfBoundsException e) {
+			//Ignore for the damn annoying MicroEmulator glitch
 		}
+		
+		
 		
 	}
 
 	protected void Update(float delta) {
 		
-		
+		if(System.currentTimeMillis()-lastT>=3000) {
+			sp.nextFrame();
+			lastT=System.currentTimeMillis();
+		}
 		
 	}
 

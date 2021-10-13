@@ -55,6 +55,8 @@ import josesk.undertaleme.scenes.ErrorView;
  * GameEngine class provides a basic game engine.
  */
 public class GameEngine extends GameCanvas implements Runnable {
+	
+	private static final int ORIGINAL_RESOLUTION[]= {320, 240};
 
 	public static final byte CONSOLE_TYPE_DEBUG=0;
 	public static final byte CONSOLE_TYPE_INFO=1;
@@ -75,6 +77,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 	private static long systemDebugTime;
 	private static boolean debug=false;
 	private static boolean showDebug=false;
+	private static int newW, newH;
 	private static Font consoleFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 	
 	private Vector 	  views;
@@ -326,9 +329,31 @@ public class GameEngine extends GameCanvas implements Runnable {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.game.GameCanvas#paint(javax.microedition.lcdui.Graphics)
 	 */
+	private static int lastRes[] = new int[2];
+	private static boolean resChange;
+	public static boolean hasResolutionChanged() {
+		return resChange;
+	}
 	public void paint(Graphics g) {
 		
 		try {
+			
+			if(lastRes[0]!=getWidth() || lastRes[1]!=getHeight()) {
+				lastRes= new int[]{getWidth(), getHeight()};
+				resChange=true;
+			}else
+				resChange=false;
+			
+			float originalRatio = GameEngine.getOriginalResolutionWidth()/(float)GameEngine.getOriginalResolutionHeight();
+			float ratio = GameEngine.getCanvas().getWidth()/(float)GameEngine.getCanvas().getHeight();
+			
+			if(ratio>=originalRatio) {
+				newH = GameEngine.getCanvas().getHeight();
+				newW = (int) (newH/(GameEngine.getOriginalResolutionHeight()/(float)GameEngine.getOriginalResolutionWidth()));
+			}else {
+				newW = GameEngine.getCanvas().getWidth();
+				newH = (int) (newW*(GameEngine.getOriginalResolutionHeight()/(float)GameEngine.getOriginalResolutionWidth()));
+			}
 		
 			boolean lsm = screenMode;
 			
@@ -340,14 +365,15 @@ public class GameEngine extends GameCanvas implements Runnable {
 				
 				Graphics dg = g;
 				Image i = null;
-				if(lsm==GameEngine.SCREEN_FIXED && (getWidth()!=320 || getHeight()!=240)) {
-					i = Image.createImage(320, 240);
+				if(lsm==GameEngine.SCREEN_FIXED && (getWidth()!=ORIGINAL_RESOLUTION[0] || getHeight()!=ORIGINAL_RESOLUTION[1])) {
+					i = Image.createImage(ORIGINAL_RESOLUTION[0], ORIGINAL_RESOLUTION[1]);
 					dg = i.getGraphics();
 				}
 				
 				if(view!=null) view.paint(dg);
+				dg.translate(-dg.getTranslateX(), -dg.getTranslateY());
 				
-				if(lsm==GameEngine.SCREEN_FIXED && (getWidth()!=320 || getHeight()!=240)) {
+				if(lsm==GameEngine.SCREEN_FIXED && (getWidth()!=ORIGINAL_RESOLUTION[0] || getHeight()!=ORIGINAL_RESOLUTION[1])) {
 					SmartImage sI = new SmartImage(i);
 					ImageTransformationResize iR = new ImageTransformationResize();
 					
@@ -357,7 +383,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 						g.fillRect(0, 0, getWidth(), getHeight());
 						g.setColor(0xffffff);
 						
-						int tH = (int)(240*(getWidth()/320.f));
+						int tH = (int)(ORIGINAL_RESOLUTION[1]*(getWidth()/(float)ORIGINAL_RESOLUTION[0]));
 						int yOff = (getHeight()/2)-(tH/2);
 						
 						g.fillRect(0, yOff-1, getWidth(), tH+2);
@@ -371,7 +397,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 						g.fillRect(0, 0, getWidth(), getHeight());
 						g.setColor(0xffffff);
 						
-						int tW = (int)(320*(getHeight()/240.f));
+						int tW = (int)(ORIGINAL_RESOLUTION[0]*(getHeight()/(float)ORIGINAL_RESOLUTION[1]));
 						int xOff = (getWidth()/2)-(tW/2);
 						
 						g.fillRect(xOff-1, 0, tW+2, getHeight());
@@ -429,7 +455,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 					
 				}
 				
-				int soundDebugX = (int)(getResolutionWidth()*(183/320.f));
+				int soundDebugX = (int)(getResolutionWidth()*(183/(float)ORIGINAL_RESOLUTION[0]));
 				
 				byte as = (byte) ram.length;
 				//int lastX=(GameEngine.getCanvas().getWidth()/(as-1))*(-1), lastY=40;
@@ -550,7 +576,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 			return getWidth(); 
 		}
 		
-		return 320;
+		return ORIGINAL_RESOLUTION[0];
 	}
 	
 	/**
@@ -562,7 +588,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 			return getHeight(); 
 		}
 		
-		return 240;
+		return ORIGINAL_RESOLUTION[1];
 	}
 	
 	public void onDestroy() {
@@ -745,10 +771,26 @@ public class GameEngine extends GameCanvas implements Runnable {
 		return engine;
 	}
 	
+	public static int getOriginalResolutionWidth() {
+		return ORIGINAL_RESOLUTION[0];
+	}
+	
+	public static int getOriginalResolutionHeight() {
+		return ORIGINAL_RESOLUTION[1];
+	}
+	
+	public static int adaptX(float x) {
+		return (int) (newW*(x/(float)GameEngine.getOriginalResolutionWidth()));
+	}
+	
+	public static int adaptY(float y) {
+		return (int) (newH*(y/(float)GameEngine.getOriginalResolutionHeight()));
+	}
+	
 	/**
 	 * Set screen mode
 	 * SCREEN_DYNAMIC = Adapts to screen resolution
-	 * SCREEN_FIXED = Fix to 320x240
+	 * SCREEN_FIXED = Fix to ORIGINAL_RESOLUTION[0]xORIGINAL_RESOLUTION[1]
 	 * @param screenMode
 	 */
 	public final static void setScreenMode(boolean screenMode) {

@@ -39,15 +39,22 @@ public class Sprite { //Size adapted sprite
 		used.removeAllElements();
 		if(DEBUG) GameEngine.Debug("Removed "+removed+" unused cached sprites");
 	}
+	public static void clearCache() {
+		int cached = cache.size();
+		cache.clear();
+		used.removeAllElements();
+		if(DEBUG) GameEngine.Debug("Removed "+cached+" cached sprites");
+	}
 	
 	private Image image;
 	private SmartImage render;
 	private Image frames[];
+	private byte sequence[];
 	
 	private short naturalWidth, naturalHeight;
 	
 	private byte frame=0;
-	private short width, height, rot, x, y;
+	private float width, height, rot, x, y;
 	
 	public Sprite(Image image, int tileWidth, int tileHeight) {
 		this.image=image;
@@ -66,6 +73,7 @@ public class Sprite { //Size adapted sprite
 		if(image.getHeight()%frameHeight != 0.f) throw new IllegalArgumentException("Image height is not an integer multiple of the tileHeight");
 		
 		frames = new Image[(image.getHeight()/frameHeight)*(image.getWidth()/frameWidth)];
+		sequence = new byte[frames.length];
 		
 		int i=0;
 		Image cachedFrame=null;
@@ -78,6 +86,7 @@ public class Sprite { //Size adapted sprite
 						frames[i]=Image.createImage(image, x*frameWidth, y*frameHeight, frameWidth, frameHeight, javax.microedition.lcdui.game.Sprite.TRANS_NONE);
 						framecache.put(image+"@frame"+i, frames[i]);
 						if(DEBUG) GameEngine.Debug("Cached frame "+(image+"@frame"+i));
+						sequence[i]=(byte) (i+Byte.MIN_VALUE);
 						i++;
 						continue;
 					}
@@ -87,94 +96,164 @@ public class Sprite { //Size adapted sprite
 				}
 				
 				frames[i]=cachedFrame;
+				sequence[i]=(byte) (i+Byte.MIN_VALUE);
 				i++;
 			}
 	}
 	
+	private boolean tryingAgain=false;
 	public void paint(Graphics g) {
-		String key = frames[frame]+"@WIDTH"+width+"HEIGHT"+height+"ROT"+rot;
-		if(render!=null) {
-			render.drawOnGraphics(g, x, y, Graphics.HCENTER | Graphics.VCENTER, true);
+		
+		try {
+		
+			int width = (int) this.width;
+			int height = (int) this.height;
+			int x = (int) this.x;
+			int y = (int) this.y;
+			
+			if(GameEngine.getCanvas().getWidth()!=GameEngine.getOriginalResolutionWidth() || GameEngine.getCanvas().getHeight()!=GameEngine.getOriginalResolutionHeight()) {
+				//Rescale and reposition sprite if not the desired resolution
+				
+				width=GameEngine.adaptX(this.width);
+				height=GameEngine.adaptY(this.height);
+				x=GameEngine.adaptX(this.x);
+				y=GameEngine.adaptY(this.y);
+			}
+			
+			if(width<=0||height<=0) return;
+			
+			if(GameEngine.hasResolutionChanged())
+				render=null;
+			
+			String key = frames[sequence[frame]-Byte.MIN_VALUE]+"@WIDTH"+width+"HEIGHT"+height+"ROT"+rot;
+			if(render!=null) {
+				render.drawOnGraphics(g, x, y, Graphics.HCENTER | Graphics.VCENTER, true);
+				if(!used.contains(key)) used.addElement(key);
+				return;
+			}
+			
+			SmartImage render = (SmartImage)cache.get(key);
+			if(render==null) {
+				render=new SmartImage(frames[sequence[frame]-Byte.MIN_VALUE]);
+				resize.setTargetDimensions(width, height);
+				rotate.setAngle((int) rot);
+				render=(SmartImage) resize.process(render);
+				render=(SmartImage) rotate.process(render);
+				cache.put(key, render);
+				if(DEBUG) GameEngine.Debug("Cached "+key);
+			}
+			
+			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
+			int ty=g.getTranslateY();
+			g.translate(-tx, -ty);
+			render.drawOnGraphics(g, x+tx, y+ty, Graphics.HCENTER | Graphics.VCENTER, true);
+			g.translate(tx,  ty);
+			
 			if(!used.contains(key)) used.addElement(key);
+			this.render=render;
+		}catch(OutOfMemoryError e) {
+			if(tryingAgain)
+				throw e;
+			
+			tryingAgain=true;
+			clearCache(); //TODO: Universal GameEngine's API call to clear all cached stuff (Sprite, shader, sounds etc)
+			paint(g);
+		}
+		tryingAgain=false;
+	}
+	
+	public void setFrameSequence(int[] sequence) {
+		if(sequence==null) {
+			this.sequence=new byte[frames.length];
+			for(int i=0; i<frames.length; i++) 
+				this.sequence[i]=(byte) (i+Byte.MIN_VALUE);
+			setFrame(0);
 			return;
 		}
 		
-		SmartImage render = (SmartImage)cache.get(key);
-		if(render==null) {
-			render=new SmartImage(frames[frame]);
-			resize.setTargetDimensions(width, height);
-			rotate.setAngle(rot);
-			render=(SmartImage) resize.process(render);
-			render=(SmartImage) rotate.process(render);
-			cache.put(key, render);
-			if(DEBUG) GameEngine.Debug("Cached "+key);
-		}
 		
-		render.drawOnGraphics(g, x, y, Graphics.HCENTER | Graphics.VCENTER, true);
-		if(!used.contains(key)) used.addElement(key);
-		this.render=render;
+		this.sequence=new byte[sequence.length];
+		for(int i=0; i<sequence.length; i++) 
+			this.sequence[i]=(byte)(sequence[i]+Byte.MIN_VALUE);
+		setFrame(0);
+		
+	}
+	
+	public int getFrameSequenceLength() {
+		return sequence.length;
 	}
 	
 	public void setFrame(int frame) {
 		this.frame = (byte)frame;
+		render=null;
 	}
 	
 	public void nextFrame() {
 		byte frame=(byte) (this.frame+1);
-		if(frame>=frames.length) frame=0;
+		if(frame>=sequence.length) frame=0;
 		this.frame=frame;
+		render=null;
 	}
 	
-	public void lastFrame() {
+	public void prevFrame() {
 		byte frame=(byte) (this.frame-1);
-		if(frame<0) frame=(byte) (frames.length-1);
+		if(frame<0) frame=(byte) (sequence.length-1);
 		this.frame=frame;
+		render=null;
 	}
 	
 	public int getFrame() {
 		return frame;
 	}
 	
-	public void setRot(int rot) {
-		this.rot = (short)(Math.abs(rot) - 360*(Math.abs(rot)/360));
+	public void setRot(double rot) {
+		this.rot = (float)(Math.abs(rot) - 360*(Math.abs((int)rot)/360));
 		render=null;
 	}
 	
-	public int getRot() {
+	public float getRot() {
 		return rot;
 	}
 	
-	public void setWidth(int width) {
-		this.width=(short)width;
+	public void setWidth(double width) {
+		this.width=(float)width;
 		render=null;
 	}
 	
-	public int getWidth() {
+	public float getWidth() {
 		return width;
 	}
 	
-	public void setHeight(int height) {
-		this.height=(short)height;
+	public void resetWidth() {
+		width=naturalWidth;
+	}
+	
+	public void setHeight(double height) {
+		this.height=(float) height;
 		render=null;
 	}
 	
-	public int getHeight() {
+	public float getHeight() {
 		return height;
 	}
 	
-	public void setX(int x) {
-		this.x = (short)x;
+	public void resetHeight() {
+		height=naturalHeight;
 	}
 	
-	public int getX() {
+	public void setX(double x) {
+		this.x = (float) x;
+	}
+	
+	public float getX() {
 		return x;
 	}
 	
-	public void setY(int y) {
-		this.y = (short)y;
+	public void setY(double y) {
+		this.y = (float) y;
 	}
 	
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 
