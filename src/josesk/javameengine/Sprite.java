@@ -14,7 +14,7 @@ import com.j2mearmyknife.image.transformations.ImageTransformationRotate;
 
 import josesk.undertaleme.GameEngine;
 
-public class Sprite { //Size adapted sprite
+public class Sprite{ //Size adapted sprite
 	
 	private static final boolean DEBUG=true;
 	
@@ -56,49 +56,25 @@ public class Sprite { //Size adapted sprite
 	private byte frame=0;
 	private float width, height, rot, x, y;
 	
-	public Sprite(Image image, int tileWidth, int tileHeight) {
-		this.image=image;
-		if(image==null) throw new NullPointerException("Image is NULL");
-		int frameWidth = image.getWidth()/tileWidth;
-		int frameHeight = image.getHeight()/tileHeight;
-		this.naturalHeight = (short)frameHeight;
-		this.naturalWidth = (short)frameWidth;
-		width = naturalWidth;
-		height = naturalHeight;
-		rot = 0;
-		
-		if(frameHeight<1) throw new IllegalArgumentException("frameHeight is less than 1");
-		if(frameWidth<1) throw new IllegalArgumentException("frameWidth is less than 1");
-		if(image.getWidth()%frameWidth != 0.f) throw new IllegalArgumentException("Image width is not an integer multiple of the tileWidth");
-		if(image.getHeight()%frameHeight != 0.f) throw new IllegalArgumentException("Image height is not an integer multiple of the tileHeight");
-		
-		frames = new Image[(image.getHeight()/frameHeight)*(image.getWidth()/frameWidth)];
-		sequence = new byte[frames.length];
-		
-		int i=0;
-		Image cachedFrame=null;
-		for(int y=0; y<image.getHeight()/frameHeight; y++)
-			for(int x=0; x<image.getWidth()/frameWidth; x++) {
-				
-				try {
-					cachedFrame = (Image)framecache.get(image+"@frame"+i);
-					if(cachedFrame==null) {
-						frames[i]=Image.createImage(image, x*frameWidth, y*frameHeight, frameWidth, frameHeight, javax.microedition.lcdui.game.Sprite.TRANS_NONE);
-						framecache.put(image+"@frame"+i, frames[i]);
-						if(DEBUG) GameEngine.Debug("Cached frame "+(image+"@frame"+i));
-						sequence[i]=(byte) (i+Byte.MIN_VALUE);
-						i++;
-						continue;
-					}
-				}catch(ClassCastException e) {
-					GameEngine.DebugError("Invalid Sprite frame cache!");
-					GameEngine.DebugError(image+"@frame"+i);
-				}
-				
-				frames[i]=cachedFrame;
-				sequence[i]=(byte) (i+Byte.MIN_VALUE);
-				i++;
-			}
+	public Sprite(Sprite sprite) {
+		setImage(image, image.getWidth()/frames[0].getWidth(), image.getHeight()/frames[0].getHeight());
+		setX(sprite.getX());
+		setY(sprite.getY());
+		setWidth(sprite.getWidth());
+		setHeight(sprite.getHeight());
+		setRot(sprite.getRot());
+		sequence = new byte[sprite.sequence.length];
+		for(int i=0; i<sequence.length; i++)
+			sequence[i]=sprite.sequence[i];
+		setFrame(sprite.getFrame());
+	}
+	
+	public Sprite(Image image) {
+		setImage(image, 1, 1);
+	}
+	
+	public Sprite(Image image, int widthTiles, int heightTiles) {
+		setImage(image, widthTiles, heightTiles);
 	}
 	
 	private boolean tryingAgain=false;
@@ -146,7 +122,11 @@ public class Sprite { //Size adapted sprite
 			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
 			int ty=g.getTranslateY();
 			g.translate(-tx, -ty);
-			render.drawOnGraphics(g, x+tx, y+ty, Graphics.HCENTER | Graphics.VCENTER, true);
+			try {
+				render.drawOnGraphics(g, x+tx, y+ty, Graphics.HCENTER | Graphics.VCENTER, true);
+			}catch(ArrayIndexOutOfBoundsException e) {
+				//Ignore for the damn annoying MicroEmulator glitch
+			}
 			g.translate(tx,  ty);
 			
 			if(!used.contains(key)) used.addElement(key);
@@ -241,6 +221,11 @@ public class Sprite { //Size adapted sprite
 		height=naturalHeight;
 	}
 	
+	public void resetSize() {
+		resetHeight();
+		resetWidth();
+	}
+	
 	public void setX(double x) {
 		this.x = (float) x;
 	}
@@ -255,6 +240,55 @@ public class Sprite { //Size adapted sprite
 	
 	public float getY() {
 		return y;
+	}
+	
+	public Image getSpriteSheet() {
+		return image;
+	}
+	
+	public void setImage(Image image, int widthTiles, int heightTiles) {
+		this.image=image;
+		if(image==null) throw new NullPointerException("Image is NULL");
+		int frameWidth = image.getWidth()/widthTiles;
+		int frameHeight = image.getHeight()/heightTiles;
+		this.naturalHeight = (short)frameHeight;
+		this.naturalWidth = (short)frameWidth;
+		width = naturalWidth;
+		height = naturalHeight;
+		rot = 0;
+		
+		if(frameHeight<1) throw new IllegalArgumentException("frameHeight is less than 1");
+		if(frameWidth<1) throw new IllegalArgumentException("frameWidth is less than 1");
+		if(image.getWidth()%frameWidth != 0.f) throw new IllegalArgumentException("Image width is not an integer multiple of the widthTiles");
+		if(image.getHeight()%frameHeight != 0.f) throw new IllegalArgumentException("Image height is not an integer multiple of the heightTiles");
+		
+		frames = new Image[(image.getHeight()/frameHeight)*(image.getWidth()/frameWidth)];
+		sequence = new byte[frames.length];
+		
+		int i=0;
+		Image cachedFrame=null;
+		for(int y=0; y<image.getHeight()/frameHeight; y++)
+			for(int x=0; x<image.getWidth()/frameWidth; x++) {
+				
+				try {
+					cachedFrame = (Image)framecache.get(image+"@frame"+i);
+					if(cachedFrame==null) {
+						frames[i]=Image.createImage(image, x*frameWidth, y*frameHeight, frameWidth, frameHeight, javax.microedition.lcdui.game.Sprite.TRANS_NONE);
+						framecache.put(image+"@frame"+i, frames[i]);
+						if(DEBUG) GameEngine.Debug("Cached frame "+(image+"@frame"+i));
+						sequence[i]=(byte) (i+Byte.MIN_VALUE);
+						i++;
+						continue;
+					}
+				}catch(ClassCastException e) {
+					GameEngine.DebugError("Invalid Sprite frame cache!");
+					GameEngine.DebugError(image+"@frame"+i);
+				}
+				
+				frames[i]=cachedFrame;
+				sequence[i]=(byte) (i+Byte.MIN_VALUE);
+				i++;
+			}
 	}
 
 }

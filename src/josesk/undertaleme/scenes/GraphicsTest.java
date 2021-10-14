@@ -38,13 +38,7 @@ public class GraphicsTest extends GameView{
 		sp.setWidth(oW*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
 		sp.setHeight(oH*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
 		
-		try{
-			sp.paint(g);
-		}catch(ArrayIndexOutOfBoundsException e) {
-			//Ignore for the damn annoying MicroEmulator glitch
-		}
-		
-		
+		sp.paint(g);
 		
 	}
 
