@@ -195,6 +195,10 @@ public class Sprite{ //Size adapted sprite
 		return rot;
 	}
 	
+	public void resetRot() {
+		setRot(0);
+	}
+	
 	public void setWidth(double width) {
 		this.width=(float)width;
 		render=null;
