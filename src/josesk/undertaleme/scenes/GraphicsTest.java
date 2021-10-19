@@ -30,13 +30,32 @@ public class GraphicsTest extends GameView{
 		
 		g.setColor(0xaaaaaa);
 		g.fillRect(0, 0, g.getClipWidth(),g.getClipHeight());
-		g.translate(g.getClipWidth()/2, g.getClipHeight()/2);
 		
+		/*//Órbita
+		sp.setAnchor(g.getClipWidth()/2, g.getClipHeight()/2);
 		sp.setRot((int)System.currentTimeMillis()/10);
 		sp.setX((GameEngine.getOriginalResolutionWidth()/4.f)*Math.cos(System.currentTimeMillis()/500.d));
 		sp.setY((GameEngine.getOriginalResolutionHeight()/4.f)*Math.sin(System.currentTimeMillis()/500.d));
 		sp.setWidth(oW*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
 		sp.setHeight(oH*(Math.cos(System.currentTimeMillis()/900.d)+1.2f));
+		sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)*Math.cos(System.currentTimeMillis()/200.d)), (int)((sp.getOriginalHeight()/2)*Math.sin(System.currentTimeMillis()/200.d)));
+		*/
+		
+		/*//Rotação na referência
+		sp.setAnchor(g.getClipWidth()/2, g.getClipHeight()/2);
+		sp.setRot(0);
+		sp.setX(0);
+		sp.setY(0);
+		sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)*Math.cos(System.currentTimeMillis()/500.d)), (int)((sp.getOriginalHeight()/2)*Math.sin(System.currentTimeMillis()/500.d)));
+		*/
+		
+		//Rotação no canto
+		sp.setAnchor((g.getClipWidth()/2), (g.getClipHeight()/2));
+		sp.setRot((int)System.currentTimeMillis()/10);
+		sp.setX(0);
+		sp.setY(0);
+		sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)), (int)((sp.getOriginalHeight()/2)));
+		
 		
 		sp.paint(g);
 		

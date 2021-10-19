@@ -54,7 +54,8 @@ public class Sprite{ //Size adapted sprite
 	private short naturalWidth, naturalHeight;
 	
 	private byte frame=0;
-	private float width, height, rot, x, y;
+	private float width, height, rot=0, x=0, y=0;
+	private short anchorX, anchorY, refPixelX, refPixelY;
 	
 	public Sprite(Sprite sprite) {
 		setImage(image, image.getWidth()/frames[0].getWidth(), image.getHeight()/frames[0].getHeight());
@@ -78,6 +79,7 @@ public class Sprite{ //Size adapted sprite
 	}
 	
 	private boolean tryingAgain=false;
+	private final static double rad = 180/Math.PI;
 	public void paint(Graphics g) {
 		
 		try {
@@ -97,7 +99,9 @@ public class Sprite{ //Size adapted sprite
 			}
 			
 			if(width<=0||height<=0) return;
-			
+			int refPixelX = (int)(width/(float)frames[sequence[frame]-Byte.MIN_VALUE].getWidth()*this.refPixelX);
+			int refPixelY = (int)(height/(float)frames[sequence[frame]-Byte.MIN_VALUE].getHeight()*this.refPixelY);
+			//GameEngine.Debug(refPixelX+"X"+refPixelY);
 			if(GameEngine.hasResolutionChanged())
 				render=null;
 			
@@ -122,11 +126,26 @@ public class Sprite{ //Size adapted sprite
 			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
 			int ty=g.getTranslateY();
 			g.translate(-tx, -ty);
+			
+			int px = (int)(refPixelX*Math.cos(-rot/rad)+refPixelY*Math.sin(-rot/rad));
+			int py = (int)(refPixelY*Math.cos(rot/rad)+refPixelX*Math.sin(rot/rad));
+			
+			int dx = (int)(x+anchorX  +tx);
+			int dy = (int)(y+anchorY  +ty);
 			try {
-				render.drawOnGraphics(g, x+tx, y+ty, Graphics.HCENTER | Graphics.VCENTER, true);
+				render.drawOnGraphics(g, dx-px, dy-py, Graphics.HCENTER | Graphics.VCENTER, true);
 			}catch(ArrayIndexOutOfBoundsException e) {
 				//Ignore for the damn annoying MicroEmulator glitch
 			}
+			
+			/*//DEBUG
+			g.setColor(0xffffff); //White
+			g.drawLine(anchorX+tx, anchorY+ty, dx, dy); //Anchor to refPixel
+			g.drawLine(dx, dy, dx-px, dy-py); //refPixel to sprite
+			g.fillRect(dx+px, dy+py, 1, 1); //sprite
+			g.setColor(0xffff00); //Yellow
+			g.fillRect(dx,dy, 1, 1); //refPixel
+			//*/
 			g.translate(tx,  ty);
 			
 			if(!used.contains(key)) used.addElement(key);
@@ -230,6 +249,14 @@ public class Sprite{ //Size adapted sprite
 		resetWidth();
 	}
 	
+	public int getOriginalWidth() {
+		return frames[0].getWidth();
+	}
+	
+	public int getOriginalHeight() {
+		return frames[0].getHeight();
+	}
+	
 	public void setX(double x) {
 		this.x = (float) x;
 	}
@@ -244,6 +271,32 @@ public class Sprite{ //Size adapted sprite
 	
 	public float getY() {
 		return y;
+	}
+	
+	public void setAnchor(int x, int y) {
+		anchorX=(short)x;
+		anchorY=(short)y;
+	}
+	
+	public int getAnchorX() {
+		return anchorX;
+	}
+	
+	public int getAnchorY() {
+		return anchorY;
+	}
+	
+	public void setRefPixelPosition(int x, int y) {
+		refPixelX = (short)x;
+		refPixelY = (short)y;
+	}
+	
+	public int getRefPixelX() {
+		return refPixelX;
+	}
+	
+	public int getRefPixelY() {
+		return refPixelY;
 	}
 	
 	public Image getSpriteSheet() {
@@ -293,6 +346,10 @@ public class Sprite{ //Size adapted sprite
 				sequence[i]=(byte) (i+Byte.MIN_VALUE);
 				i++;
 			}
+	}
+	
+	private static class ColisionBox{
+		short x, y, width, height;
 	}
 
 }
