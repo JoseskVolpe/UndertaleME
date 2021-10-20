@@ -5,13 +5,14 @@ import java.io.IOException;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
+import josesk.javameengine.Control;
 import josesk.javameengine.Sprite;
 import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.GameView;
 
 public class GraphicsTest extends GameView{
 
-	Sprite sp;
+	Sprite sp, sp2;
 	int oW, oH;
 	
 	public GraphicsTest() {
@@ -21,17 +22,22 @@ public class GraphicsTest extends GameView{
 			sp.addColisionBox(0, 0, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
 			sp.addColisionBox(sp.getOriginalWidth()/2, sp.getOriginalHeight()/2, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
 			
+			sp2 = new Sprite(Image.createImage("/player.png"));
+			sp2.addColisionBox(0, 0, sp2.getOriginalWidth(), sp2.getOriginalHeight());
+			
 			oW = (int) sp.getWidth();
 			oH = (int) sp.getHeight();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 	
 	long lastT=System.currentTimeMillis();
 	protected void render(Graphics g) {
 		
-		g.setColor(0xaaaaaa);
+		g.setColor(0x050505);
 		g.fillRect(0, 0, g.getClipWidth(),g.getClipHeight());
 		
 		/*//Órbita
@@ -57,10 +63,11 @@ public class GraphicsTest extends GameView{
 		sp.setRot((int)System.currentTimeMillis()/10);
 		sp.setX(0);
 		sp.setY(0);
-		sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)), (int)((sp.getOriginalHeight()/2)));
+		//sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)), (int)((sp.getOriginalHeight()/2)));
 		
-		
+		sp2.setAnchor((g.getClipWidth()/2), (g.getClipHeight()/2));
 		sp.paint(g);
+		sp2.paint(g);
 		
 	}
 
@@ -69,6 +76,26 @@ public class GraphicsTest extends GameView{
 		if(System.currentTimeMillis()-lastT>=3000) {
 			sp.nextFrame();
 			lastT=System.currentTimeMillis();
+		}
+		
+		float vel=100;
+		if(Control.isKeyDown(119)) {//w
+			sp2.move(0, -vel*delta);
+		}
+		if(Control.isKeyDown(115)) {//s
+			sp2.move(0, vel*delta);
+		}
+		if(Control.isKeyDown(97)) {//a
+			sp2.move(-vel*delta, 0);
+		}
+		if(Control.isKeyDown(100)) {//d
+			sp2.move(vel*delta, 0);
+		}
+		if(Control.isKeyDown(-4)) {
+			sp2.setRot(sp2.getRot()+vel*delta);
+		}
+		if(Control.isKeyDown(-3)) {
+			sp2.setRot(sp2.getRot()-vel*delta);
 		}
 		
 	}

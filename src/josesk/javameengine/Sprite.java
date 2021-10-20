@@ -57,7 +57,7 @@ public class Sprite{ //Size adapted sprite
 	
 	private byte frame=0;
 	private float width, height, rot=0, x=0, y=0;
-	private short anchorX, anchorY, refPixelX, refPixelY;
+	private short anchorX=0, anchorY=0, refPixelX=0, refPixelY=0;
 	
 	public Sprite(Sprite sprite) {
 		setImage(image, image.getWidth()/frames[0].getWidth(), image.getHeight()/frames[0].getHeight());
@@ -107,10 +107,22 @@ public class Sprite{ //Size adapted sprite
 			if(GameEngine.hasResolutionChanged())
 				render=null;
 			
+			int px = getRelativeRotX(refPixelX, refPixelY, rot);
+			int py = getRelativeRotY(refPixelX, refPixelY, rot);
+			
+			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
+			int ty=g.getTranslateY();
+			g.translate(-tx, -ty);
+			int dx = (int)(x+anchorX  +tx);
+			int dy = (int)(y+anchorY  +ty);
+			
 			String key = frames[sequence[frame]-Byte.MIN_VALUE]+"@WIDTH"+width+"HEIGHT"+height+"ROT"+rot;
 			if(render!=null) {
-				render.drawOnGraphics(g, x, y, Graphics.HCENTER | Graphics.VCENTER, true);
+				
+				render.drawOnGraphics(g, dx-px, dy-py, Graphics.HCENTER | Graphics.VCENTER, true);
+				g.translate(tx,  ty);
 				if(!used.contains(key)) used.addElement(key);
+				paintCollisions(g, x, y, anchorX, anchorY, px, py);
 				return;
 			}
 			
@@ -125,15 +137,7 @@ public class Sprite{ //Size adapted sprite
 				if(DEBUG_CACHE) GameEngine.Debug("Cached "+key);
 			}
 			
-			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
-			int ty=g.getTranslateY();
-			g.translate(-tx, -ty);
 			
-			int px = getRelativeRotX(refPixelX, refPixelY, rot);
-			int py = getRelativeRotY(refPixelX, refPixelY, rot);
-			
-			int dx = (int)(x+anchorX  +tx);
-			int dy = (int)(y+anchorY  +ty);
 			try {
 				render.drawOnGraphics(g, dx-px, dy-py, Graphics.HCENTER | Graphics.VCENTER, true);
 			}catch(ArrayIndexOutOfBoundsException e) {
@@ -153,35 +157,7 @@ public class Sprite{ //Size adapted sprite
 			
 			g.translate(tx,  ty);
 			
-			if(DEBUG_COLISION) {
-				g.setColor(0xa5a5ff);
-				ColisionBox cb;
-				int b[][], cbx, cby, cbw, cbh;
-				int scx=x+anchorX;
-				int scy=y+anchorY;
-				for(int i=0; i<colisionBoxes.size(); i++) {
-					cb = (ColisionBox)colisionBoxes.elementAt(i);
-					
-					cbw=GameEngine.adaptX(cb.width);
-					cbh=GameEngine.adaptY(cb.height);
-					
-					cbx=(int) (GameEngine.adaptX(cb.x)-(this.width/2));
-					cby=(int) (GameEngine.adaptY(cb.y)-(this.height/2));
-					
-					b=new int[][]{
-						{getRelativeRotX(cbx, cby, rot), getRelativeRotY(cbx, cby, rot)}, //top-left
-						{getRelativeRotX(cbx+cbw, cby, rot), getRelativeRotY(cbx+cbw, cby, rot)}, //top-right
-						{getRelativeRotX(cbx, cby+cbh, rot), getRelativeRotY(cbx, cby+cbh, rot)}, //bottom-left
-						{getRelativeRotX(cbx+cbw, cby+cbh, rot), getRelativeRotY(cbx+cbw, cby+cbh, rot)} //bottom-right
-					};
-					
-					g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[2][0], scy-py+b[2][1]); //Left
-					g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[1][0], scy-py+b[1][1]); //Top
-					g.drawLine(scx-px+b[1][0], scy-py+b[1][1], scx-px+b[3][0], scy-py+b[3][1]); //Right
-					g.drawLine(scx-px+b[2][0], scy-py+b[2][1], scx-px+b[3][0], scy-py+b[3][1]); //Bottom
-					
-				}
-			}
+			paintCollisions(g, x, y, anchorX, anchorY, px, py);
 			
 			if(!used.contains(key)) used.addElement(key);
 			this.render=render;
@@ -194,6 +170,38 @@ public class Sprite{ //Size adapted sprite
 			paint(g);
 		}
 		tryingAgain=false;
+	}
+	
+	private void paintCollisions(Graphics g, int x, int y, int anchorX, int anchorY, int px, int py) {
+		if(DEBUG_COLISION) {
+			g.setColor(0xa5a5ff);
+			ColisionBox cb;
+			int b[][], cbx, cby, cbw, cbh;
+			int scx=x+anchorX;
+			int scy=y+anchorY;
+			for(int i=0; i<colisionBoxes.size(); i++) {
+				cb = (ColisionBox)colisionBoxes.elementAt(i);
+				
+				cbw=GameEngine.adaptX(cb.width);
+				cbh=GameEngine.adaptY(cb.height);
+				
+				cbx=(int) (GameEngine.adaptX(cb.x)-(this.width/2));
+				cby=(int) (GameEngine.adaptY(cb.y)-(this.height/2));
+				
+				b=new int[][]{
+					{getRelativeRotX(cbx, cby, rot), getRelativeRotY(cbx, cby, rot)}, //top-left
+					{getRelativeRotX(cbx+cbw, cby, rot), getRelativeRotY(cbx+cbw, cby, rot)}, //top-right
+					{getRelativeRotX(cbx, cby+cbh, rot), getRelativeRotY(cbx, cby+cbh, rot)}, //bottom-left
+					{getRelativeRotX(cbx+cbw, cby+cbh, rot), getRelativeRotY(cbx+cbw, cby+cbh, rot)} //bottom-right
+				};
+				
+				g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[2][0], scy-py+b[2][1]); //Left
+				g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[1][0], scy-py+b[1][1]); //Top
+				g.drawLine(scx-px+b[1][0], scy-py+b[1][1], scx-px+b[3][0], scy-py+b[3][1]); //Right
+				g.drawLine(scx-px+b[2][0], scy-py+b[2][1], scx-px+b[3][0], scy-py+b[3][1]); //Bottom
+				
+			}
+		}
 	}
 	
 	private static int getRelativeRotX(int refPixelX, int refPixelY, float rot) {
@@ -314,6 +322,12 @@ public class Sprite{ //Size adapted sprite
 	
 	public float getY() {
 		return y;
+	}
+	
+	public void move(float x, float y) {
+		this.x+=x;
+		this.y+=y;
+		//FIXME: Detect collision
 	}
 	
 	public void setAnchor(int x, int y) {

@@ -44,6 +44,7 @@ package josesk.javameengine;
 import josesk.undertaleme.GameEngine;
 import josesk.undertaleme.GameView;
 
+/**@deprecated this shall be rescripted with a completely new structure*/
 public class Control {
 	
 	protected final static String[] CommandName = {"Left", "Right", "Up", "Down", "Ok", "Back", "Right Soft", "Left Soft"}; //Commands names
@@ -110,7 +111,7 @@ public class Control {
 			5 //x
 	}; 
 	
-	protected static boolean commandDown[];
+	protected static boolean commandDown[], keyDown[]=new boolean[510];
 	protected static boolean initied = false;
 	protected static GameView gameview;
 	
@@ -190,8 +191,13 @@ public class Control {
 				
 			}
 			
+			
+			
 		}
 		
+		int i=key+255;
+		if(i>=0&&i<keyDown.length)
+			keyDown[i]=true;
 	}
 	
 	/**
@@ -210,7 +216,11 @@ public class Control {
 				
 			}
 			
+			
 		}
+		int i=key+255;
+		if(i>=0&&i<keyDown.length)
+			keyDown[i]=false;
 		
 	}
 	
@@ -237,6 +247,22 @@ public class Control {
 		
 		return false;
 		
+	}
+	
+	public static boolean isKeyDown(int key) {
+		int i=key+255;
+		if(i>=0&&i<keyDown.length)
+			return keyDown[i];
+		
+		return false;
+	}
+	
+	public static boolean isKeyUp(int key) {
+		int i=key+255;
+		if(i>=0&&i<keyDown.length)
+			return !keyDown[i];
+		
+		return true;
 	}
 	
 	/**
