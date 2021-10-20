@@ -18,6 +18,9 @@ public class GraphicsTest extends GameView{
 		try {
 			sp = new Sprite(Image.createImage("/buttons.jpg"), 4, 1);
 			sp.setFrameSequence(new int[] {0,3,2});
+			sp.addColisionBox(0, 0, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
+			sp.addColisionBox(sp.getOriginalWidth()/2, sp.getOriginalHeight()/2, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
+			
 			oW = (int) sp.getWidth();
 			oH = (int) sp.getHeight();
 		} catch (IOException e) {

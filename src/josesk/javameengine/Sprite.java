@@ -16,7 +16,8 @@ import josesk.undertaleme.GameEngine;
 
 public class Sprite{ //Size adapted sprite
 	
-	private static final boolean DEBUG=true;
+	private static final boolean DEBUG_CACHE=true;
+	public static boolean DEBUG_COLISION=true;
 	
 	private static ImageTransformationResize resize = new ImageTransformationResize();
 	private static ImageTransformationRotate rotate = new ImageTransformationRotate();
@@ -37,19 +38,20 @@ public class Sprite{ //Size adapted sprite
 			cache.remove(remove.pop());
 		
 		used.removeAllElements();
-		if(DEBUG) GameEngine.Debug("Removed "+removed+" unused cached sprites");
+		if(DEBUG_CACHE) GameEngine.Debug("Removed "+removed+" unused cached sprites");
 	}
 	public static void clearCache() {
 		int cached = cache.size();
 		cache.clear();
 		used.removeAllElements();
-		if(DEBUG) GameEngine.Debug("Removed "+cached+" cached sprites");
+		if(DEBUG_CACHE) GameEngine.Debug("Removed "+cached+" cached sprites");
 	}
 	
 	private Image image;
 	private SmartImage render;
 	private Image frames[];
 	private byte sequence[];
+	private Vector colisionBoxes = new Vector();
 	
 	private short naturalWidth, naturalHeight;
 	
@@ -120,15 +122,15 @@ public class Sprite{ //Size adapted sprite
 				render=(SmartImage) resize.process(render);
 				render=(SmartImage) rotate.process(render);
 				cache.put(key, render);
-				if(DEBUG) GameEngine.Debug("Cached "+key);
+				if(DEBUG_CACHE) GameEngine.Debug("Cached "+key);
 			}
 			
 			int tx=g.getTranslateX(); //Fix for some phones and MicroEmulator
 			int ty=g.getTranslateY();
 			g.translate(-tx, -ty);
 			
-			int px = (int)(refPixelX*Math.cos(-rot/rad)+refPixelY*Math.sin(-rot/rad));
-			int py = (int)(refPixelY*Math.cos(rot/rad)+refPixelX*Math.sin(rot/rad));
+			int px = getRelativeRotX(refPixelX, refPixelY, rot);
+			int py = getRelativeRotY(refPixelX, refPixelY, rot);
 			
 			int dx = (int)(x+anchorX  +tx);
 			int dy = (int)(y+anchorY  +ty);
@@ -138,6 +140,8 @@ public class Sprite{ //Size adapted sprite
 				//Ignore for the damn annoying MicroEmulator glitch
 			}
 			
+			
+			
 			/*//DEBUG
 			g.setColor(0xffffff); //White
 			g.drawLine(anchorX+tx, anchorY+ty, dx, dy); //Anchor to refPixel
@@ -146,7 +150,38 @@ public class Sprite{ //Size adapted sprite
 			g.setColor(0xffff00); //Yellow
 			g.fillRect(dx,dy, 1, 1); //refPixel
 			//*/
+			
 			g.translate(tx,  ty);
+			
+			if(DEBUG_COLISION) {
+				g.setColor(0xa5a5ff);
+				ColisionBox cb;
+				int b[][], cbx, cby, cbw, cbh;
+				int scx=x+anchorX;
+				int scy=y+anchorY;
+				for(int i=0; i<colisionBoxes.size(); i++) {
+					cb = (ColisionBox)colisionBoxes.elementAt(i);
+					
+					cbw=GameEngine.adaptX(cb.width);
+					cbh=GameEngine.adaptY(cb.height);
+					
+					cbx=(int) (GameEngine.adaptX(cb.x)-(this.width/2));
+					cby=(int) (GameEngine.adaptY(cb.y)-(this.height/2));
+					
+					b=new int[][]{
+						{getRelativeRotX(cbx, cby, rot), getRelativeRotY(cbx, cby, rot)}, //top-left
+						{getRelativeRotX(cbx+cbw, cby, rot), getRelativeRotY(cbx+cbw, cby, rot)}, //top-right
+						{getRelativeRotX(cbx, cby+cbh, rot), getRelativeRotY(cbx, cby+cbh, rot)}, //bottom-left
+						{getRelativeRotX(cbx+cbw, cby+cbh, rot), getRelativeRotY(cbx+cbw, cby+cbh, rot)} //bottom-right
+					};
+					
+					g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[2][0], scy-py+b[2][1]); //Left
+					g.drawLine(scx-px+b[0][0], scy-py+b[0][1], scx-px+b[1][0], scy-py+b[1][1]); //Top
+					g.drawLine(scx-px+b[1][0], scy-py+b[1][1], scx-px+b[3][0], scy-py+b[3][1]); //Right
+					g.drawLine(scx-px+b[2][0], scy-py+b[2][1], scx-px+b[3][0], scy-py+b[3][1]); //Bottom
+					
+				}
+			}
 			
 			if(!used.contains(key)) used.addElement(key);
 			this.render=render;
@@ -159,6 +194,14 @@ public class Sprite{ //Size adapted sprite
 			paint(g);
 		}
 		tryingAgain=false;
+	}
+	
+	private static int getRelativeRotX(int refPixelX, int refPixelY, float rot) {
+		return (int)(refPixelX*Math.cos(-rot/rad)+refPixelY*Math.sin(-rot/rad));
+	}
+	
+	public static int getRelativeRotY(int refPixelX, int refPixelY, float rot) {
+		return (int)(refPixelY*Math.cos(rot/rad)+refPixelX*Math.sin(rot/rad));
 	}
 	
 	public void setFrameSequence(int[] sequence) {
@@ -299,6 +342,14 @@ public class Sprite{ //Size adapted sprite
 		return refPixelY;
 	}
 	
+	public void addColisionBox(int x, int y, int width, int height) {
+		colisionBoxes.addElement(new ColisionBox(x, y, width, height));
+	}
+	
+	public void clearColisionBoxes() {
+		colisionBoxes.removeAllElements();
+	}
+	
 	public Image getSpriteSheet() {
 		return image;
 	}
@@ -332,7 +383,7 @@ public class Sprite{ //Size adapted sprite
 					if(cachedFrame==null) {
 						frames[i]=Image.createImage(image, x*frameWidth, y*frameHeight, frameWidth, frameHeight, javax.microedition.lcdui.game.Sprite.TRANS_NONE);
 						framecache.put(image+"@frame"+i, frames[i]);
-						if(DEBUG) GameEngine.Debug("Cached frame "+(image+"@frame"+i));
+						if(DEBUG_CACHE) GameEngine.Debug("Cached frame "+(image+"@frame"+i));
 						sequence[i]=(byte) (i+Byte.MIN_VALUE);
 						i++;
 						continue;
@@ -350,6 +401,13 @@ public class Sprite{ //Size adapted sprite
 	
 	private static class ColisionBox{
 		short x, y, width, height;
+		
+		ColisionBox(int x, int y, int width, int height){
+			this.x=(short)x;
+			this.y=(short)y;
+			this.width=(short)width;
+			this.height = (short)height;
+		}
 	}
 
 }
