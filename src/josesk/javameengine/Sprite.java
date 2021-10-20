@@ -119,7 +119,11 @@ public class Sprite{ //Size adapted sprite
 			String key = frames[sequence[frame]-Byte.MIN_VALUE]+"@WIDTH"+width+"HEIGHT"+height+"ROT"+rot;
 			if(render!=null) {
 				
-				render.drawOnGraphics(g, dx-px, dy-py, Graphics.HCENTER | Graphics.VCENTER, true);
+				try {
+					render.drawOnGraphics(g, dx-px, dy-py, Graphics.HCENTER | Graphics.VCENTER, true);
+				}catch(ArrayIndexOutOfBoundsException e) {
+					//Ignore for the damn annoying MicroEmulator glitch
+				}
 				g.translate(tx,  ty);
 				if(!used.contains(key)) used.addElement(key);
 				paintCollisions(g, x, y, anchorX, anchorY, px, py);
@@ -185,8 +189,8 @@ public class Sprite{ //Size adapted sprite
 				cbw=GameEngine.adaptX(cb.width);
 				cbh=GameEngine.adaptY(cb.height);
 				
-				cbx=(int) (GameEngine.adaptX(cb.x)-(this.width/2));
-				cby=(int) (GameEngine.adaptY(cb.y)-(this.height/2));
+				cbx=(int) (GameEngine.adaptX(cb.x-(this.width/2)));
+				cby=(int) (GameEngine.adaptY(cb.y-(this.height/2)));
 				
 				b=new int[][]{
 					{getRelativeRotX(cbx, cby, rot), getRelativeRotY(cbx, cby, rot)}, //top-left

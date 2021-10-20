@@ -19,8 +19,9 @@ public class GraphicsTest extends GameView{
 		try {
 			sp = new Sprite(Image.createImage("/buttons.jpg"), 4, 1);
 			sp.setFrameSequence(new int[] {0,3,2});
-			sp.addColisionBox(0, 0, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
-			sp.addColisionBox(sp.getOriginalWidth()/2, sp.getOriginalHeight()/2, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
+			sp.addColisionBox(0, 0, sp.getOriginalWidth(), sp.getOriginalHeight());
+			//sp.addColisionBox(0, 0, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
+			//sp.addColisionBox(sp.getOriginalWidth()/2, sp.getOriginalHeight()/2, sp.getOriginalWidth()/2, sp.getOriginalHeight()/2);
 			
 			sp2 = new Sprite(Image.createImage("/player.png"));
 			sp2.addColisionBox(0, 0, sp2.getOriginalWidth(), sp2.getOriginalHeight());
@@ -63,7 +64,7 @@ public class GraphicsTest extends GameView{
 		sp.setRot((int)System.currentTimeMillis()/10);
 		sp.setX(0);
 		sp.setY(0);
-		//sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)), (int)((sp.getOriginalHeight()/2)));
+		sp.setRefPixelPosition((int)((sp.getOriginalWidth()/2)), (int)((sp.getOriginalHeight()/2)));
 		
 		sp2.setAnchor((g.getClipWidth()/2), (g.getClipHeight()/2));
 		sp.paint(g);
