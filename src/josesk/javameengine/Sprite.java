@@ -257,7 +257,7 @@ public class Sprite{ //Size adapted sprite
 	}
 	
 	public void setRot(double rot) {
-		this.rot = (float)(Math.abs(rot) - 360*(Math.abs((int)rot)/360));
+		this.rot = (float)(Math.abs(rot) - 360*(Math.abs((int)rot)/360)); //FIXME counter-clockwise rotation is stuck in higher FPS
 		render=null;
 	}
 	
