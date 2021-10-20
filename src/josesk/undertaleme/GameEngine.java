@@ -428,7 +428,7 @@ public class GameEngine extends GameCanvas implements Runnable {
 						if(GameEngine.getCanvas().getHeight()-(j*12)<0) continue;
 						
 						g.setColor(0x000000);
-						g.fillRect(0, GameEngine.getCanvas().getHeight()-((j+1)*12), console[i].length()*12, 12);
+						//g.fillRect(0, GameEngine.getCanvas().getHeight()-((j+1)*12), console[i].length()*12, 12);
 						
 						switch(consoleType[i]) {
 							case CONSOLE_TYPE_DEBUG:

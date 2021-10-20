@@ -208,6 +208,62 @@ public class Sprite{ //Size adapted sprite
 		}
 	}
 	
+	private static boolean intersectVectors(int r[], int s[]) {
+		if(r[2]*s[3]==r[3]*s[2]) return false; //False if vectors are collinear
+		
+		/*
+		 * 0 - x
+		 * 1 - y
+		 * 2 - width
+		 * 3 - height
+		 */
+		
+		int m1, m2;
+		m1 = (r[1]+r[3]-r[1])/(r[0]+r[2]-r[0]);
+		m2 = (s[1]+s[3]-s[1])/(s[0]+s[2]-s[0]);
+		
+		int n1, n2;
+		n1 = r[1]-m1*r[0];
+		n2 = s[1]-m2*s[0];
+		
+		int a1, a2, a3, b1, b2, b3, n3;
+		a1=m1;
+		a2=m2;
+		b1=-1;
+		b2=-1;
+		
+		a3=a1+a2;
+		b3=b1+b2;
+		n3=n1+n2;
+		
+		int x, y;
+		y = (-n1*a3+a1*n3)/(-a1*b3+b1);
+		x = (-b3*y-n3)/a3;
+		
+		int xr0=r[0];
+		int xr1=r[0]+r[2];
+		int yr0=r[1];
+		int yr1=r[1]+r[3];
+		int xs0=s[0];
+		int xs1=s[0]+s[2];
+		int ys0=s[1];
+		int ys1=s[1]+s[3];
+		
+		
+		if(
+				x>=Math.min(xr0, xr1) &&
+				x<= Math.max(xr0, xr1) &&
+				x>=Math.min(xs0,  xs1) &&
+				x<=Math.max(xs0,  xs1) &&
+				y>=Math.min(yr0, yr1) &&
+				y<=Math.max(yr0,  yr1) &&
+				y>=Math.min(ys0,  ys1) &&
+				y<=Math.max(ys0,  ys1)
+				) return true;
+		
+		return false;
+	}
+	
 	private static int getRelativeRotX(int refPixelX, int refPixelY, float rot) {
 		return (int)(refPixelX*Math.cos(-rot/rad)+refPixelY*Math.sin(-rot/rad));
 	}
