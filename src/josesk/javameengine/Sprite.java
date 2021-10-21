@@ -208,7 +208,7 @@ public class Sprite{ //Size adapted sprite
 		}
 	}
 	
-	private static boolean intersectVectors(int r[], int s[]) {
+	private static boolean intersectVectors(int r[], int s[]) { //FIXME: Experimental
 		if(r[2]*s[3]==r[3]*s[2]) return false; //False if vectors are collinear
 		
 		/*
@@ -218,15 +218,15 @@ public class Sprite{ //Size adapted sprite
 		 * 3 - height
 		 */
 		
-		int m1, m2;
-		m1 = (r[1]+r[3]-r[1])/(r[0]+r[2]-r[0]);
-		m2 = (s[1]+s[3]-s[1])/(s[0]+s[2]-s[0]);
+		float m1, m2;
+		m1 = (r[1]+r[3]-r[1])/(float)(r[0]+r[2]-r[0]);
+		m2 = (s[1]+s[3]-s[1])/(float)(s[0]+s[2]-s[0]);
 		
-		int n1, n2;
+		float n1, n2;
 		n1 = r[1]-m1*r[0];
 		n2 = s[1]-m2*s[0];
 		
-		int a1, a2, a3, b1, b2, b3, n3;
+		float a1, a2, a3, b1, b2, b3, n3;
 		a1=m1;
 		a2=m2;
 		b1=-1;
@@ -236,9 +236,14 @@ public class Sprite{ //Size adapted sprite
 		b3=b1+b2;
 		n3=n1+n2;
 		
-		int x, y;
-		y = (-n1*a3+a1*n3)/(-a1*b3+b1);
-		x = (-b3*y-n3)/a3;
+		float x, y;
+		if(Math.abs(a3)<=0.5) {
+			y=-n3/(float)b3;
+			x=(-b1*y-n1)/(float)a1;
+		}else {
+			y = (-n1*a3+a1*n3)/(float)(-a1*b3+b1);
+			x = (-b3*y-n3)/a3;
+		}
 		
 		int xr0=r[0];
 		int xr1=r[0]+r[2];
@@ -249,10 +254,9 @@ public class Sprite{ //Size adapted sprite
 		int ys0=s[1];
 		int ys1=s[1]+s[3];
 		
-		
 		if(
 				x>=Math.min(xr0, xr1) &&
-				x<= Math.max(xr0, xr1) &&
+				x<=Math.max(xr0, xr1) &&
 				x>=Math.min(xs0,  xs1) &&
 				x<=Math.max(xs0,  xs1) &&
 				y>=Math.min(yr0, yr1) &&
